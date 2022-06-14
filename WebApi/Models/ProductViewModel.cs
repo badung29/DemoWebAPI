@@ -11,18 +11,22 @@ namespace WebApi.Models
     {
         public long ID { get; set; }
 
-        [StringLength(250)]
-        public string Name { get; set; }
-
         [StringLength(10)]
+        [Required(ErrorMessage = "Code is required!")]
         public string Code { get; set; }
 
         [StringLength(250)]
+        [Required(ErrorMessage = "Name is required!")]
+        public string Name { get; set; }
+        [StringLength(250)]
+        [Required(ErrorMessage = "Title is required!")]
         public string MetaTitle { get; set; }
 
+        [Required(ErrorMessage = "Price is required!")]
         public decimal? Price { get; set; }
 
-        public int Quantity { get; set; }
+        [Required(ErrorMessage = "Quantity is required!")]
+        public int? Quantity { get; set; }
       
     }
 }
