@@ -11,7 +11,7 @@ namespace WebApi.Controllers
 {
     public class ProductController : Controller
     {
-        // GET: Product
+        // GET: Product 
         public ActionResult Index(string searchString, int page = 1, int pageSize = 5)
         {
             IEnumerable<ProductViewModel> productList = new List<ProductViewModel>();
@@ -20,7 +20,7 @@ namespace WebApi.Controllers
             IQueryable<ProductViewModel> prodList = productList.AsQueryable();
             if (!string.IsNullOrEmpty(searchString))
             {
-                productList = productList.Where(x => x.Name != null && x.Name.ToUpper().Contains(searchString.ToUpper()) || x.Code !=null && x.Code.ToUpper().Contains(searchString.ToUpper()));
+                productList = productList.Where(x => x.Name != null && x.Name.ToUpper().Contains(searchString.ToUpper()) || x.Code != null && x.Code.ToUpper().Contains(searchString.ToUpper()));
             }
             int totalProduct = productList.Count();
             float numberPage = (float)totalProduct / pageSize;
@@ -46,8 +46,8 @@ namespace WebApi.Controllers
             {
                 IEnumerable<ProductViewModel> productList = new List<ProductViewModel>();
                 HttpResponseMessage res = GlobalVariables.WebApiClient.GetAsync("Products").Result;
-                productList = res.Content.ReadAsAsync<IEnumerable<ProductViewModel>>().Result;               
-                
+                productList = res.Content.ReadAsAsync<IEnumerable<ProductViewModel>>().Result;
+
                 if (productList.Where(x => x.Name != null).Select(x => x.Name.ToLower()).Contains(data.Name.ToLower()))
                 {
                     ModelState.AddModelError("", "Duplicate product name!");
@@ -85,90 +85,79 @@ namespace WebApi.Controllers
         [HttpGet]
         public ActionResult DetailProduct(int id)
         {
-            //var product = new ProductDao().ViewDetail(id);
-            //var product = new ProductDao().GetProductByID(id).FirstOrDefault();
-            ProductViewModel cate = new ProductViewModel();
-            //cate.ID = product.ID;
-            //cate.CategoryID = product.CategoryID;
-            //cate.Name = product.Name;
-            //cate.Code = product.Code;
-            //cate.MetaTitle = product.MetaTitle;
-            //cate.Price = (decimal)product.Price;
-            //cate.Quantity = product.Quantity;
-            //var dao = new CategoryDao();
-            //cate.CateCollection = dao.ListAll();
-            return PartialView("DetailProduct", cate);
+            ProductViewModel data = new ProductViewModel();
+            HttpResponseMessage response = GlobalVariables.WebApiClient.GetAsync("Products/" + id).Result;
+            data = response.Content.ReadAsAsync<ProductViewModel>().Result;
+            return PartialView("DetailProduct", data);
         }
 
         [HttpGet]
         public ActionResult EditProduct(int id)
         {
-            //var product = new ProductDao().ViewDetail(id);
-            //var product = new ProductDao().GetProductByID(id).FirstOrDefault();
-            ProductViewModel cate = new ProductViewModel();
-            //cate.ID = product.ID;
-            //cate.CategoryID = product.CategoryID;
-            //cate.Name = product.Name;
-            //cate.Code = product.Code;
-            //cate.MetaTitle = product.MetaTitle;
-            //cate.Price = (decimal)product.Price;
-            //cate.Quantity = product.Quantity;
-            //var dao = new CategoryDao();
-            //cate.CateCollection = dao.ListAll();
-            return PartialView("EditProduct", cate);
+            ProductViewModel data = new ProductViewModel();
+            HttpResponseMessage response = GlobalVariables.WebApiClient.GetAsync("Products/" + id).Result;
+            data = response.Content.ReadAsAsync<ProductViewModel>().Result;
+            return PartialView("EditProduct", data);
         }
 
         [HttpPost]
         public ActionResult UpdateProduct(ProductViewModel data)
         {
-            //var Catedao = new CategoryDao();
-            //data.CateCollection = Catedao.ListAll();
-            //if (ModelState.IsValid)
-            //{
-            //    if (data.Price == 0)
-            //    {
-            //        ModelState.AddModelError("", "Please enter the price!");
-            //    }
-            //    else if (data.Quantity == 0)
-            //    {
-            //        ModelState.AddModelError("", "Please enter the quantity!");
-            //    }
-            //    else
-            //    {
-            //        var product = new Product();
-            //        product.ID = data.ID;
-            //        product.Name = data.Name;
-            //        product.Code = data.Code;
-            //        product.MetaTitle = data.MetaTitle;
-            //        product.Price = data.Price;
-            //        product.Quantity = data.Quantity;
-            //        product.CategoryID = data.CategoryID;
-            //        var dao = new ProductDao();
-            //        var result = dao.Update(product);
-            //        if (result)
-            //        {
-            //            TempData["SuccessMessage"] = "Product " + product.Name + " Saved Successfully";
-            //            return Json(true, JsonRequestBehavior.AllowGet);
-            //        }
-            //        else
-            //        {
-            //            ModelState.AddModelError("", "Update product fail");
-            //        }
-            //    }
-            //}
+            if (ModelState.IsValid)
+            {
+                IEnumerable<ProductViewModel> productList = new List<ProductViewModel>();
+                HttpResponseMessage res = GlobalVariables.WebApiClient.GetAsync("Products").Result;
+                productList = res.Content.ReadAsAsync<IEnumerable<ProductViewModel>>().Result;
+
+                if (productList.Where(x => x.Name != null).Select(x => x.Name.ToLower()).Contains(data.Name.ToLower()))
+                {
+                    ModelState.AddModelError("", "Duplicate product name!");
+                }
+                else if (productList.Where(x => x.Code != null).Select(x => x.Code.ToLower()).Contains(data.Code.ToLower()))
+                {
+                    ModelState.AddModelError("", "Duplicate product code");
+                }
+                else if (data.Price == 0)
+                {
+                    ModelState.AddModelError("", "Please enter the price!");
+                }
+                else if (data.Quantity == 0)
+                {
+                    ModelState.AddModelError("", "Please enter the quantity!");
+                }
+                else
+                {
+                    HttpResponseMessage response = GlobalVariables.WebApiClient.PutAsJsonAsync("Products/" + data.ID, data).Result;
+                    if (response.IsSuccessStatusCode)
+                    {
+                        TempData["SuccessMessage"] = "Product " + data.Name + " Saved Successfully";
+                        return Json(true, JsonRequestBehavior.AllowGet);
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", "Update product fail!");
+                    }
+                }
+            }
             return PartialView("EditProduct", data);
         }
 
         [HttpPost]
         public JsonResult DeleteProduct(int id)
         {
-            //if (id != 0)
-            //{
-            //    new ProductDao().Delete(id);
-            //}
-            //else { return Json(new { status = false }); }
-
-            return Json(new { status = true });
+            if (id != 0)
+            {
+                HttpResponseMessage response = GlobalVariables.WebApiClient.DeleteAsync("Products/" + id).Result;
+                if (response.IsSuccessStatusCode)
+                {
+                    return Json(new { status = true });
+                }
+                else
+                {
+                    return Json(new { status = false });
+                }
+            }
+            return Json(new { status = false });
         }
     }
 }
