@@ -48,11 +48,11 @@ namespace WebApi.Controllers
                 HttpResponseMessage res = GlobalVariables.WebApiClient.GetAsync("Products").Result;
                 productList = res.Content.ReadAsAsync<IEnumerable<ProductViewModel>>().Result;               
                 
-                if (productList.Where(x => x.Name != null).Select(x => x.Name.ToUpper()).Contains(data.Name.ToUpper()))
+                if (productList.Where(x => x.Name != null).Select(x => x.Name.ToLower()).Contains(data.Name.ToLower()))
                 {
                     ModelState.AddModelError("", "Duplicate product name!");
                 }
-                else if (productList.Where(x => x.Code != null).Select(x => x.Code.ToUpper()).Contains(data.Code.ToUpper()))
+                else if (productList.Where(x => x.Code != null).Select(x => x.Code.ToLower()).Contains(data.Code.ToLower()))
                 {
                     ModelState.AddModelError("", "Duplicate product code!");
                 }
